@@ -8,5 +8,7 @@ public enum MongoDBReminderStrategy
     /// <summary>
     /// The standard classic strategy.
     /// </summary>
-    StandardStorage
+    StandardStorage,
+    
+    HashedLookupStorage
 }
