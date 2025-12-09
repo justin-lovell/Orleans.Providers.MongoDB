@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Providers.MongoDB.Configuration;
@@ -24,7 +26,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
         {
             var options = Options.Create(new MongoDBRemindersOptions
             {
-                CollectionPrefix = "Test_",
+                CollectionPrefix = $"Test_{Random.Shared.Next()}",
                 DatabaseName = "OrleansTest",
                 Strategy = MongoDBReminderStrategy.StandardStorage
             });
@@ -57,6 +59,29 @@ namespace Orleans.Providers.MongoDB.UnitTest.Reminders
         public async Task Test_ReminderSimple()
         {
             await ReminderSimple();
+        }
+
+        [SkippableFact]
+        public async Task Test_RemindersTotalDuration()
+        {
+            Skip.IfNot(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("CI")));
+            
+            // warm-up, create indexes, ect.
+            await ReminderSimple();
+            await ReminderSimple();
+            
+            var stopwatch = Stopwatch.StartNew();
+
+            for (int i = 0; i < 5000; i++)
+            {
+                await ReminderSimple();
+            }
+            
+            await RemindersRange(50);
+            
+            stopwatch.Stop();
+            testOutputHelper.WriteLine($"Total elapsed time: {stopwatch.Elapsed}");
+            await mongoClientFixture.AssertQualityChecksAsync(testOutputHelper);
         }
     }
 }
