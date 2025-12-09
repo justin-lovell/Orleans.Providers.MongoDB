@@ -20,7 +20,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
     ///         will perform a two-stage removal.
     ///     </p>
     ///     <p>
-    ///         A low-cardinality of reminders per grain has been assumed.
+    ///         A low cardinality of reminders per grain has been assumed.
     ///     </p>
     /// </summary>
     public class MongoReminderHashedCollection : CollectionBase<MongoReminderDocument>, IMongoReminderCollection
@@ -148,6 +148,7 @@ namespace Orleans.Providers.MongoDB.Reminders.Store
             try
             {
                 var result = await Collection.ReplaceOneAsync(
+                    // ReSharper disable once EqualExpressionComparison -- etag will only mutate after update
                     x => x.Id == id && entry.ETag == entry.ETag,
                     MongoReminderDocument.Create(id, serviceId, entry, updatedEtag), 
                     UpsertReplace
