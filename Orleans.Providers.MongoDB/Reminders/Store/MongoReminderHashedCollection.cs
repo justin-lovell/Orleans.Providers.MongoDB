@@ -9,7 +9,20 @@ using Orleans.Runtime;
 
 namespace Orleans.Providers.MongoDB.Reminders.Store
 {
-    public class MongoReminderHashedCollection : CollectionBase<MongoReminderSlimDocument>, IMongoReminderCollection
+    /// <summary>
+    ///     <p>
+    ///         Represents a MongoDB-based implementation of a reminder collection utilizing hashed key retrieval strategy.
+    ///         This class is responsible for managing reminder data by reading, writing, and removing rows, as well
+    ///         as setting up the collection schema and indexes for efficient querying.
+    ///     </p>
+    ///     <p>
+    ///         Removal of the reminder is a single delete operation, unlike the <see cref="MongoReminderCollection"/> which
+    ///         will perform a two-stage removal.
+    ///     </p>
+    ///     <p>
+    ///         A low-cardinality of reminders per grain has been assumed.
+    ///     </p>
+    /// </summary>
     public class MongoReminderHashedCollection : CollectionBase<MongoReminderDocument>, IMongoReminderCollection
     {
         private readonly string serviceId;
