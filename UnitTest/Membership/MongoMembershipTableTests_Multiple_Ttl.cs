@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
 using Orleans.Configuration;
 using Orleans.Messaging;
 using Orleans.Providers.MongoDB.Configuration;
@@ -32,22 +30,8 @@ public class MongoMembershipTableTests_Multiple_Ttl : MembershipTableTestsBase
     {
     }
 
-    private static void SetIndexMonitorFrequency()
-    {
-        var client = MongoDatabaseFixture.ReplicaSetFactory.Create(nameof(MongoMembershipTableTests_Multiple_Ttl));
-        var adminDb = client.GetDatabase("admin");
-
-        adminDb.RunCommand(new BsonDocumentCommand<BsonDocument>(new BsonDocument
-        {
-            { "setParameter", 1 },
-            { "ttlMonitorSleepSecs", MonitorTtlInterval.TotalSeconds }
-        }));
-    }
-
     protected override IMembershipTable CreateMembershipTable(ILogger logger)
     {
-        SetIndexMonitorFrequency();
-        
         var options = Options.Create(new MongoDBMembershipTableOptions
         {
             CollectionPrefix = "TestTtl_",
@@ -66,8 +50,6 @@ public class MongoMembershipTableTests_Multiple_Ttl : MembershipTableTestsBase
 
     protected override IGatewayListProvider CreateGatewayListProvider(ILogger logger)
     {
-        SetIndexMonitorFrequency();
-        
         var options = Options.Create(new MongoDBGatewayListProviderOptions
         {
             CollectionPrefix = "TestTtl_",
