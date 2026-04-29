@@ -144,9 +144,14 @@ public class MongoMembershipTableTests_Multiple_Ttl : MembershipTableTestsBase
         await MembershipTable_UpdateIAmAlive(true);
     }
 
-    [Fact, TestCategory("Functional")]
+    [SkippableFact, TestCategory("Functional")]
     public async Task Test_VerifyMongoIndexTtl_IsEffective()
     {
+        #if MONGO_6
+        Skip.IfNot(string.IsNullOrEmpty(Environment.GetEnvironmentVariable("GITHUB_JOB")),
+            "Mongo 6 on GH does not respond to TTL monitor sleep settings. Mongo 6 is also EOL");
+        #endif
+        
         // inspired by MembershipTable_CleanupDefunctSiloEntries scenario
         // note that the CleanupDefunctSiloEntries is not called explicitly. Collection is cleaned up by TTL index
         

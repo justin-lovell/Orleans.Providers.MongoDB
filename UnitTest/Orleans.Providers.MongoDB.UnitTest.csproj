@@ -8,6 +8,10 @@
     <IsPackable>false</IsPackable>
     <MongoVersion Condition="'$(MongoVersion)' == ''">8</MongoVersion>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <DefineConstants Condition="'$(MongoVersion)' == '6'">MONGO_6</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
