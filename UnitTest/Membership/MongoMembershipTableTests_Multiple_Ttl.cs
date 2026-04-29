@@ -90,7 +90,7 @@ public class MongoMembershipTableTests_Multiple_Ttl : MembershipTableTestsBase
         return Task.FromResult(MongoDatabaseFixture.ReplicaSetConnectionString);
     }
 
-    [Fact, TestCategory("Functional")]
+    [Fact(Skip = "Assertions made in scenario has false positives due to Mongo TTL dropping"), TestCategory("Functional")]
     public async Task Test_CleanupDefunctSiloEntries()
     {
         await MembershipTable_CleanupDefunctSiloEntries();
