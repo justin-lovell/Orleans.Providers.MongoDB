@@ -10,7 +10,12 @@ namespace Orleans.Providers.MongoDB.UnitTest.Fixtures
         private bool disposedValue;
 
         private static readonly Lazy<IMongoRunner> _databaseRunner = new(() => MongoRunner.Run());
-        private static readonly Lazy<IMongoRunner> _replicaSetRunner = new(() => MongoRunner.Run(new MongoRunnerOptions { UseSingleNodeReplicaSet = true }));
+
+        private static readonly Lazy<IMongoRunner> _replicaSetRunner = new(() => MongoRunner.Run(new MongoRunnerOptions
+        {
+            UseSingleNodeReplicaSet = true,
+            AdditionalArguments = "--setParameter ttlMonitorSleepSecs=1"
+        }));
 
         public static string DatabaseConnectionString => _databaseRunner.Value.ConnectionString;
 
