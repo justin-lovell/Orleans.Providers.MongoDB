@@ -25,6 +25,8 @@ namespace Orleans.Providers.MongoDB.Utils
         }
         
         public static bool IsDuplicateIndex(this MongoCommandException ex) => ex.Code == 85;
+        
+        public static bool IsIndexMissing(this MongoCommandException ex) => ex.Code is 26 or 27;
 
         internal static string GetFieldName<T>(this IMongoCollection<T> collection, Expression<Func<T, object>> expression)
         {

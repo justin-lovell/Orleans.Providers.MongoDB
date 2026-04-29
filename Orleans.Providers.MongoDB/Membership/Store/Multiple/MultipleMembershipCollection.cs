@@ -2,7 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using Orleans.Providers.MongoDB.Utils;
 using Orleans.Runtime;
@@ -72,7 +75,62 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
 
         public Task InitializeTtl(string clusterId, TimeSpan? timeToLive)
         {
-            return Task.CompletedTask;
+            var indexName = $"ttl_{Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(clusterId)))}";
+
+            return timeToLive == null
+                ? DropExistingIndexIfNeeded()
+                : UpdateTtlIndexPolicy(timeToLive.Value);
+
+            async Task DropExistingIndexIfNeeded()
+            {
+                try
+                {
+                    // drop the index if it was already created in the past, and the cluster settings revert to explicit
+                    await Collection.Indexes.DropOneAsync(indexName);
+                }
+                catch (MongoCommandException e) when (e.IsIndexMissing())
+                {
+                    // do nothing since the index is already dropped
+                }
+            }
+
+            async Task UpdateTtlIndexPolicy(TimeSpan ttl)
+            {
+                var safeTimeToLive = Math.Round(ttl.TotalSeconds, MidpointRounding.AwayFromZero);
+
+                try
+                {
+                    // in the event that the index already exists, we need to update the TTL policy due to a cluster
+                    // configuration modification
+                    var updateExpireAfterCommand = new BsonDocument()
+                    {
+                        { "collMod", CollectionName() },
+                        {
+                            "index", new BsonDocument
+                            {
+                                { "name", indexName },
+                                { "expireAfterSeconds", safeTimeToLive },
+                            }
+                        },
+                    };
+                    await Database.RunCommandAsync(new BsonDocumentCommand<BsonDocument>(updateExpireAfterCommand));
+                }
+                catch (MongoCommandException e) when (e.IsIndexMissing())
+                {
+                    var keysDefinition = Index.Ascending(x => x.Timestamp);
+                    // ensure that index ttl only applies to documents within the cluster deployment id
+                    var partialFilterExpression = Filter.Eq(x => x.DeploymentId, clusterId);
+                    var indexOptions = new CreateIndexOptions<MongoMembershipDocument>
+                    {
+                        Name = indexName,
+                        ExpireAfter = TimeSpan.FromSeconds(safeTimeToLive),
+                        PartialFilterExpression = partialFilterExpression,
+                    };
+
+                    await Collection.Indexes.CreateOneAsync(
+                        new CreateIndexModel<MongoMembershipDocument>(keysDefinition, indexOptions));
+                }
+            }
         }
 
         private async Task<bool> UpsertRowAsync(IClientSessionHandle session, string deploymentId, MembershipEntry entry, string etag)
