@@ -192,7 +192,7 @@ public class MongoMembershipTableTests_Multiple_Ttl : MembershipTableTestsBase
         Assert.True(ok, "InsertRow failed");
         
         // we have to wait for the mongo background monitor to trigger. add some buffer
-        await Task.Delay(MonitorTtlInterval + TimeSpan.FromSeconds(5));
+        await Task.Delay(MonitorTtlInterval + TimeSpan.FromSeconds(15));
         
         data = await membershipTable.ReadAll();
         Assert.Single(data.Members);
