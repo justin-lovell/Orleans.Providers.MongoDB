@@ -17,6 +17,7 @@ namespace Orleans.Providers.MongoDB.Membership
     {
         private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoMembershipTable> logger;
+        private readonly ClusterMembershipOptions clusterMembershipOptions;
         private readonly MongoDBMembershipTableOptions options;
         private readonly string clusterId;
         private IMongoMembershipCollection membershipCollection;
@@ -25,10 +26,12 @@ namespace Orleans.Providers.MongoDB.Membership
             IMongoClientFactory mongoClientFactory,
             ILogger<MongoMembershipTable> logger,
             IOptions<ClusterOptions> clusterOptions,
+            IOptions<ClusterMembershipOptions> clusterMembershipOptions,
             IOptions<MongoDBMembershipTableOptions> options)
         {
             this.mongoClient = mongoClientFactory.Create(options.Value, "Membership");
             this.logger = logger;
+            this.clusterMembershipOptions = clusterMembershipOptions.Value;
             this.options = options.Value;
             this.clusterId = clusterOptions.Value.ClusterId;
         }
@@ -38,7 +41,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             membershipCollection = Factory.CreateCollection(mongoClient, options, options.Strategy);
 
-            return Task.CompletedTask;
+            return membershipCollection.InitializeTtl(clusterId, clusterMembershipOptions.GetMongoTtlTimeSpan(options.UseMongoTtlIndex));
         }
 
         /// <inheritdoc />

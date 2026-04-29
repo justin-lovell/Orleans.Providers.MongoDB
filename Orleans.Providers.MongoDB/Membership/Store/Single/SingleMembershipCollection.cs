@@ -136,6 +136,11 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Single
             }
         }
 
+        public Task InitializeTtl(string clusterId, TimeSpan? timeToLive)
+        {
+            return Task.CompletedTask;
+        }
+
         private static string BuildKey(SiloAddress address)
         {
             return address.ToParsableString().Replace('.', '_');

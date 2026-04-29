@@ -70,6 +70,11 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
             });
         }
 
+        public Task InitializeTtl(string clusterId, TimeSpan? timeToLive)
+        {
+            return Task.CompletedTask;
+        }
+
         private async Task<bool> UpsertRowAsync(IClientSessionHandle session, string deploymentId, MembershipEntry entry, string etag)
         {
             var id = ReturnId(deploymentId, entry.SiloAddress);

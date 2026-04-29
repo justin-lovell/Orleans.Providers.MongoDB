@@ -20,5 +20,7 @@ namespace Orleans.Providers.MongoDB.Membership.Store
         Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime);
 
         Task<bool> UpsertRow(string deploymentId, MembershipEntry entry, string etag, TableVersion tableVersion);
+        
+        Task InitializeTtl(string clusterId, TimeSpan? timeToLive);
     }
 }

@@ -6,6 +6,7 @@ using Orleans.Providers.MongoDB.Configuration;
 using Orleans.Providers.MongoDB.Membership;
 using Orleans.Providers.MongoDB.UnitTest.Fixtures;
 using System.Threading.Tasks;
+using Orleans.Configuration;
 using TestExtensions;
 using UnitTests;
 using UnitTests.MembershipTests;
@@ -35,6 +36,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
                 MongoDatabaseFixture.DatabaseFactory,
                 loggerFactory.CreateLogger<MongoMembershipTable>(),
                 _clusterOptions,
+                Options.Create(new ClusterMembershipOptions()),
                 options);
         }
 
@@ -51,6 +53,7 @@ namespace Orleans.Providers.MongoDB.UnitTest.Membership
                 MongoDatabaseFixture.DatabaseFactory,
                 loggerFactory.CreateLogger<MongoGatewayListProvider>(),
                 _clusterOptions,
+                Options.Create(new ClusterMembershipOptions()),
                 _gatewayOptions,
                 options);
         }

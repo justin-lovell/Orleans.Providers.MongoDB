@@ -18,6 +18,7 @@ namespace Orleans.Providers.MongoDB.Membership
     {
         private readonly IMongoClient mongoClient;
         private readonly ILogger<MongoGatewayListProvider> logger;
+        private readonly ClusterMembershipOptions clusterMembershipOptions;
         private readonly MongoDBGatewayListProviderOptions options;
         private readonly string clusterId;
         private IMongoMembershipCollection gatewaysCollection;
@@ -32,11 +33,13 @@ namespace Orleans.Providers.MongoDB.Membership
             IMongoClientFactory mongoClientFactory,
             ILogger<MongoGatewayListProvider> logger,
             IOptions<ClusterOptions> clusterOptions,
+            IOptions<ClusterMembershipOptions> clusterMembershipOptions,
             IOptions<GatewayOptions> gatewayOptions,
             IOptions<MongoDBGatewayListProviderOptions> options)
         {
             this.mongoClient = mongoClientFactory.Create(options.Value, "Membership");
             this.logger = logger;
+            this.clusterMembershipOptions = clusterMembershipOptions.Value;
             this.options = options.Value;
             this.clusterId = clusterOptions.Value.ClusterId;
             this.MaxStaleness = gatewayOptions.Value.GatewayListRefreshPeriod;
@@ -47,7 +50,7 @@ namespace Orleans.Providers.MongoDB.Membership
         {
             CreateCollection();
 
-            return Task.CompletedTask;
+            return gatewaysCollection.InitializeTtl(clusterId, clusterMembershipOptions.GetMongoTtlTimeSpan(options.UseMongoTtlIndex));
         }
 
         private void CreateCollection()

@@ -74,6 +74,11 @@ namespace Orleans.Providers.MongoDB.Membership.Store.MultipleDeprecated
             }
         }
 
+        public Task InitializeTtl(string clusterId, TimeSpan? timeToLive)
+        {
+            return Task.CompletedTask;
+        }
+
         public async Task<IList<Uri>> GetGateways(string deploymentId)
         {
             var entries =
