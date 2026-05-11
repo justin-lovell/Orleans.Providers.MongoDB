@@ -194,8 +194,13 @@ namespace Orleans.Providers.MongoDB.Membership.Store.Multiple
         public Task UpdateIAmAlive(string deploymentId, SiloAddress address, DateTime iAmAliveTime)
         {
             var id = ReturnId(deploymentId, address);
-
-            return Collection.UpdateOneAsync(x => x.Id == id, Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)));
+            return Collection.UpdateOneAsync(
+                x => x.Id == id,
+                Update.Combine(
+                    Update.Set(x => x.IAmAliveTime, LogFormatter.PrintDate(iAmAliveTime)),
+                    Update.Set(x => x.Timestamp, iAmAliveTime)
+                )
+            );
         }
 
         public Task CleanupDefunctSiloEntries(string deploymentId, DateTimeOffset beforeDate)
