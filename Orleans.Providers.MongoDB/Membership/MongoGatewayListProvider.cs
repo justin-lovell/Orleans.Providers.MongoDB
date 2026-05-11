@@ -49,8 +49,7 @@ namespace Orleans.Providers.MongoDB.Membership
         public Task InitializeGatewayListProvider()
         {
             CreateCollection();
-
-            return gatewaysCollection.InitializeTtl(clusterId, clusterMembershipOptions.GetMongoTtlTimeSpan(options.UseMongoTtlIndex));
+            return Task.CompletedTask;
         }
 
         private void CreateCollection()

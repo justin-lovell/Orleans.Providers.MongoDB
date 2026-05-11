@@ -54,8 +54,7 @@ public class MongoMembershipTableTests_Multiple_Ttl : MembershipTableTestsBase
         {
             CollectionPrefix = "TestTtl_",
             DatabaseName = "OrleansTest",
-            Strategy = MongoDBMembershipStrategy.Multiple,
-            UseMongoTtlIndex = true
+            Strategy = MongoDBMembershipStrategy.Multiple
         });
 
         return new MongoGatewayListProvider(
